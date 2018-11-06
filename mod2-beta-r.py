@@ -1,17 +1,13 @@
-"""Second model of molecular cloud with changing of Plummer scale and distance of binary star  """
+"""Second model of binary star in molecular cloud with different initial velocity and distance of binary star  """
 
 import itertools
-
 import numpy as np
-
 from numba import autojit
-
 from math import pi
-
 from multiprocessing.dummy import Pool as ThreadPool
-
 import csv
 
+#input our parameter
 
 G = 1.0 #gravitational constant
 m1 = float(raw_input('mass 1 :'))  # mass of star 1 
@@ -28,7 +24,7 @@ N = int(raw_input('totstep:'))  #total steps
 s = float(raw_input('sstep:'))  #time steps
 t0 = float(raw_input('time0:'))  #initial time
 beta1 = float(raw_input('beta1:')) #multiple numer of velocity 1
-beta2 = float(raw_input('beta2:'))  #multiple numer of velocity 1
+beta2 = float(raw_input('beta2:'))  #multiple numer of velocity 2
 betastep = int(raw_input('betastep:')) 
 beta = np.linspace(beta1, beta2, betastep)
 tau = float(raw_input('tau:'))  #changing time
@@ -37,7 +33,9 @@ tau = float(raw_input('tau:'))  #changing time
         
 @autojit
 
-def f1(t, q1, q2, q3, p1, p2, p3):  # gravity 
+# gravity function
+
+def f1(t, q1, q2, q3, p1, p2, p3):  
     
     r = ( q1 ** 2 + q2 ** 2 + q3 ** 2 ) ** 0.5  #distance of binary star in spherical coordinate
     
@@ -61,7 +59,9 @@ def f1(t, q1, q2, q3, p1, p2, p3):  # gravity
 
 @autojit
 
-def f3(t): # expansion of molecular cloud
+# expansion of molecular cloud
+
+def f3(t): 
     
     if t <= tau:  #linear expansion in durial time
         
@@ -78,16 +78,19 @@ def func(tmx):
 
     j,i= tmx[0],tmx[1]
 
-    x1 = np.array([j]) ; y1 = np.array([0.0]) ; z1 = np.array([0.0]) #star 1
-    x2 = np.array([-j]) ; y2 = np.array([0.0]) ; z2 = np.array([0.0]) #star 2, they are symmetrical
+    x1 = np.array([j]) ; y1 = np.array([0.0]) ; z1 = np.array([0.0]) #position of star 1
+    x2 = np.array([-j]) ; y2 = np.array([0.0]) ; z2 = np.array([0.0]) #position of star 2, they are symmetrical
+    
     r1 = ( x1 ** 2 + y1 ** 2 + z1 ** 2 ) ** 0.5
     r2 = (x2 ** 2 + y2 ** 2 + z2 ** 2 ) ** 0.5
+    
     vx1 = np.array([0.0]) #velocity(x) of star 1
-    vy1 = i * (G * (mb0 * (r1 ** 3) / ((R0 ** 2 + r1 ** 2) ** 1.5) - 4.0 * pi * ismdensity * (r1 ** 3) / 3 + m2 / 4.0 ) / r1) ** 0.5  #velocity(y) of star 1
+    vy1 = i * (G * (mb0 * (r1 ** 3) / ((R0 ** 2 + r1 ** 2) ** 1.5) - 4.0 * pi * ismdensity * (r1 ** 3) / 3 + m2 / 4.0 ) / r1) ** 0.5           #velocity(y) of star 1
     vz1 = np.array([0.0]) #velocity(z) of star 1
-    vx2 = np.array([0.0]) 
-    vy2 = - i * (G * (mb0 * (r2**3) / ((R0 **2 + r2**2)**1.5) -4.0*pi*ismdensity*(r2**3)/3+ m1 / 4.0 ) / r2)**0.5
-    vz2 = np.array([0.0])
+    vx2 = np.array([0.0]) #velocity(x) of star 2
+    vy2 = - i * (G * (mb0 * (r2**3) / ((R0 **2 + r2**2)**1.5) -4.0*pi*ismdensity*(r2**3)/3+ m1 / 4.0 ) / r2)**0.5  #velocity(y) of star 2
+    vz2 = np.array([0.0]) #velocity(z) of star 2
+    
     t = np.array([t0])
 
     for k in xrange(N):  #rungekutta
@@ -173,6 +176,7 @@ if __name__ == '__main__':
 
 rd = np.array(ret_data)
 
+#save the data as csv 
 np.savetxt("mod2-r0-beta-rd.csv", rd, delimiter = ",")
 tauRmassvalure = np.vstack((r0, beta))
 file2 = open('mod2-r0-beta-xyvalure.csv','w')
